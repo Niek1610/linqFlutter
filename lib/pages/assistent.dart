@@ -40,7 +40,7 @@ class _AssistantPageState extends State<AssistantPage>
     await speechToText.listen(
       onResult: onSpeechResult,
       pauseFor: Duration(seconds: 2),
-      localeId: 'nl_NL', // Stel de taal in op Nederlands
+      localeId: 'nl_NL',
     );
     aisListening = true;
 
@@ -168,7 +168,7 @@ class _AssistantPageState extends State<AssistantPage>
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50.0),
                 child: vervolgText.isEmpty
-                    ? Container() // Toon een lege container als vervolgText leeg is
+                    ? Container()
                     : ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 50),
@@ -183,7 +183,6 @@ class _AssistantPageState extends State<AssistantPage>
                             vervolgText,
                             style: TextStyle(color: Colors.white),
                             textAlign: TextAlign.center,
-                            // Center the text
                           ),
                         ),
                       ),
