@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:linqapp/secrets.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class OpenAISerice {
@@ -15,12 +15,14 @@ class OpenAISerice {
           'Je krijgt ook een document te zien waar je informatie uit kan halen $doc. . Je bent een inwerkhulp voor een zorg instelling, Je helpt met het inwerken van het persoon, dit doe je in stappen. Ik ga je zometeen vragen stellen. Ik verwacht een antwoord en vervolg vraag. Dit moet in het volgende format geschreven worden. {"answer": "<antwoord van de vraag hier>","next_question": "<Vervolg vraag hier>"} het is van belang dat je een JSON format aanhoud en dat je "answer" en "next_question" niet veranderd. De vraag is: $message.',
     });
 
+    String apiKey = dotenv.env['OPENAI_KEY']!;
+
     try {
       final response = await http.post(
         Uri.parse('https://api.openai.com/v1/chat/completions'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $openApiKey',
+          'Authorization': 'Bearer $apiKey',
         },
         body: jsonEncode({
           "model": "gpt-3.5-turbo-0125",
