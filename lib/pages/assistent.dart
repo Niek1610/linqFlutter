@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:linqapp/pages/openai_service.dart';
@@ -12,17 +11,24 @@ class AssistantPage extends StatefulWidget {
   _AssistantPageState createState() => _AssistantPageState();
 }
 
-class _AssistantPageState extends State<AssistantPage> {
+class _AssistantPageState extends State<AssistantPage>
+    with TickerProviderStateMixin {
   final speechToText = SpeechToText();
   bool aisListening = false;
   String lastWords = '';
   String vervolgText = '';
   String nextQuestion = '';
   final OpenAISerice openAISerice = OpenAISerice();
+  late AnimationController _controller;
+
   @override
   void initState() {
     super.initState();
     initSpeechToText();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    )..repeat(reverse: true);
   }
 
   Future<void> initSpeechToText() async {
@@ -51,7 +57,6 @@ class _AssistantPageState extends State<AssistantPage> {
     speechToText.stop();
     final response = await openAISerice.getResponse(lastWords);
     final content = jsonDecode(response);
-    print(content);
     nextQuestion = content['next_question'] ?? '';
     final res = content['answer'] ?? '';
 
@@ -134,8 +139,15 @@ class _AssistantPageState extends State<AssistantPage> {
                       initSpeechToText();
                     }
                   },
-                  child: Center(
+                  child: AnimatedBuilder(
+                    animation: _controller,
                     child: SvgPicture.asset('assets/images/Mic.svg'),
+                    builder: (BuildContext context, Widget? child) {
+                      return Transform.scale(
+                        scale: aisListening ? _controller.value + 0.9 : 1.0,
+                        child: child,
+                      );
+                    },
                   ),
                 ),
               ),
