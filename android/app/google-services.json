@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "551461799763",
+    "project_id": "bard-3b721",
+    "storage_bucket": "bard-3b721.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:551461799763:android:faae5be1bf4db6aafb03a6",
+        "android_client_info": {
+          "package_name": "com.example.linqapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeHSBdVtcm239f-YM8tk2vOrAKUTYt6aE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
