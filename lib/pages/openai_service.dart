@@ -9,6 +9,12 @@ class OpenAISerice {
   Future<String> getResponse(String message) async {
     final doc = await rootBundle.loadString('assets/documenten/inwerkmap.txt');
 
+    if (message.isEmpty) {
+      message = 'Kan je mij helpen met het inwerkproces?';
+    } else {
+      message = message;
+    }
+
     messageHistory.add({
       'role': 'user',
       'content':
