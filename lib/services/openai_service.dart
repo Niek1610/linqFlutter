@@ -68,8 +68,7 @@ class OpenAIService {
   Future<void> getSpeech(String message) async {
     try {
       final response = await http.post(
-        Uri.parse(
-            'https://api.openai.com/v1/audio/speech'), // Gebruik hier het juiste TTS-endpoint
+        Uri.parse('https://api.openai.com/v1/audio/speech'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $apiKey',
@@ -83,7 +82,7 @@ class OpenAIService {
 
       if (response.statusCode == 200) {
         final bytes = response.bodyBytes;
-        print('Bytes length: ${bytes.length}'); // Add this line
+        print('Bytes length: ${bytes.length}');
         await _player.startPlayer(
           fromDataBuffer: bytes,
           codec: Codec.aacMP4,
