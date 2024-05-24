@@ -18,7 +18,7 @@ class _AssistantPageState extends State<AssistantPage>
   String lastWords = '';
   String vervolgText = '';
   String nextQuestion = '';
-  final OpenAISerice openAISerice = OpenAISerice();
+  final OpenAIService openAISerice = OpenAIService();
   late AnimationController _controller;
 
   @override
@@ -55,15 +55,38 @@ class _AssistantPageState extends State<AssistantPage>
   void stopListening() async {
     aisListening = false;
     speechToText.stop();
-    final response = await openAISerice.getResponse(lastWords);
-    final content = jsonDecode(response);
-    nextQuestion = content['next_question'] ?? '';
-    final res = content['answer'] ?? '';
+    try {
+      final response = await openAISerice.getResponse(lastWords);
+      final content = jsonDecode(response);
+      if (content['error'] != null) {
+        throw Exception(content['error']);
+      }
+      nextQuestion = content['next_question'] ?? '';
+      final res = content['answer'] ?? '';
 
-    setState(() {
-      dynamicText = res;
-      vervolgText = nextQuestion;
-    });
+      setState(() {
+        dynamicText = res;
+        vervolgText = nextQuestion;
+      });
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(e.toString()),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
   }
 
   void onSpeechResult(SpeechRecognitionResult result) {
@@ -172,7 +195,7 @@ class _AssistantPageState extends State<AssistantPage>
                     : ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 50),
-                          primary: Color.fromARGB(50, 0, 0, 0),
+                          backgroundColor: Color.fromARGB(50, 0, 0, 0),
                         ),
                         onPressed: () {
                           vervolgVraag();
