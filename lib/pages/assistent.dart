@@ -59,7 +59,24 @@ class _AssistantPageState extends State<AssistantPage>
       final response = await openAISerice.getResponse(lastWords);
       final content = jsonDecode(response);
       if (content['error'] != null) {
-        throw Exception(content['error']);
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Error'),
+              content: Text(content['error']),
+              actions: [
+                TextButton(
+                  child: Text('OK'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+        return;
       }
       nextQuestion = content['next_question'] ?? '';
       final res = content['answer'] ?? '';
@@ -113,6 +130,28 @@ class _AssistantPageState extends State<AssistantPage>
     final response = await openAISerice.getResponse(vervolgText);
 
     final content = jsonDecode(response);
+
+    if (content['error'] != null) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Error'),
+            content: Text(content['error']),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+      return;
+    }
+
     nextQuestion = content['next_question'] ?? '';
     final res = content['answer'] ?? '';
 

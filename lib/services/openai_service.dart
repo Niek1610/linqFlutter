@@ -62,7 +62,6 @@ class OpenAIService {
         final content = data['choices'][0]['message']['content'];
         final contentMap = jsonDecode(content);
 
-//checkt of de json response van de AI voldoet aan de verwachtingen
         if (!checkJson(contentMap)) {
           return jsonEncode({'error': 'Onverwachte respons van de AI'});
         }
@@ -72,10 +71,23 @@ class OpenAIService {
         await getSpeech(voice);
 
         return data['choices'][0]['message']['content'];
+      } else if (response.statusCode == 503) {
+        print('Error from OpenAI API: Service Unavailable');
+        return jsonEncode({
+          'error':
+              'De service is momenteel niet beschikbaar. Probeer het over een paar minuten opnieuw.'
+        });
+      } else if (response.statusCode == 401) {
+        print('Error from OpenAI API: Unauthorized');
+        return jsonEncode(
+            {'error': 'Ongeautoriseerde toegang. Controleer uw API-sleutel.'});
+      } else {
+        print('Error from OpenAI API: ${response.body}');
+        return jsonEncode({
+          'error':
+              'Er is een onbekende fout opgetreden. HTTP status code: ${response.statusCode}'
+        });
       }
-
-      print('Error from OpenAI API: ${response.body}');
-      return jsonEncode({'error': 'Er is iets fout gegaan'});
     } catch (e) {
       print(e);
       return jsonEncode({'error': 'Er is iets fout gegaan'});
