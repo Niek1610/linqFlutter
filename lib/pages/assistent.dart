@@ -15,6 +15,7 @@ class _AssistantPageState extends State<AssistantPage>
     with TickerProviderStateMixin {
   final speechToText = SpeechToText();
   bool aisListening = false;
+  bool isThinking = false;
   String lastWords = '';
   String vervolgText = '';
   String nextQuestion = '';
@@ -55,6 +56,10 @@ class _AssistantPageState extends State<AssistantPage>
   void stopListening() async {
     aisListening = false;
     speechToText.stop();
+    setState(() {
+      isThinking = true;
+      dynamicText = "Aan het denken...";
+    });
     try {
       final response = await openAISerice.getResponse(lastWords);
       final content = jsonDecode(response);
@@ -84,6 +89,7 @@ class _AssistantPageState extends State<AssistantPage>
       setState(() {
         dynamicText = res;
         vervolgText = nextQuestion;
+        isThinking = false;
       });
     } catch (e) {
       showDialog(
@@ -118,7 +124,7 @@ class _AssistantPageState extends State<AssistantPage>
     speechToText.stop();
   }
 
-  String dynamicText = 'Klik op de rechterknop om een vraag te stellen!';
+  String dynamicText = 'Klik op de microfoon om een vraag te stellen!';
 
   void updateText() {
     setState(() {
@@ -127,6 +133,11 @@ class _AssistantPageState extends State<AssistantPage>
   }
 
   void vervolgVraag() async {
+    setState(() {
+      isThinking = true;
+      dynamicText = "Aan het denken...";
+    });
+
     final response = await openAISerice.getResponse(vervolgText);
 
     final content = jsonDecode(response);
@@ -158,6 +169,7 @@ class _AssistantPageState extends State<AssistantPage>
     setState(() {
       dynamicText = res;
       vervolgText = nextQuestion;
+      isThinking = false;
     });
   }
 
@@ -191,16 +203,18 @@ class _AssistantPageState extends State<AssistantPage>
               Padding(
                 padding: EdgeInsets.only(top: 125.0),
                 child: GestureDetector(
-                  onTap: () async {
-                    if (aisListening == true) {
-                      stopListening();
-                    } else if (await speechToText.hasPermission) {
-                      updateText();
-                      startListening();
-                    } else {
-                      initSpeechToText();
-                    }
-                  },
+                  onTap: isThinking
+                      ? null
+                      : () async {
+                          if (aisListening == true) {
+                            stopListening();
+                          } else if (await speechToText.hasPermission) {
+                            updateText();
+                            startListening();
+                          } else {
+                            initSpeechToText();
+                          }
+                        },
                   child: AnimatedBuilder(
                     animation: _controller,
                     child: SvgPicture.asset('assets/images/Mic.svg'),
@@ -229,7 +243,7 @@ class _AssistantPageState extends State<AssistantPage>
               SizedBox(height: 100.0),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50.0),
-                child: vervolgText.isEmpty
+                child: vervolgText.isEmpty || isThinking
                     ? Container()
                     : ElevatedButton(
                         style: ElevatedButton.styleFrom(
