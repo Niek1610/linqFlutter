@@ -15,6 +15,13 @@ class OpenAIService {
     _player.openPlayer();
   }
 
+  bool checkJson(Map<String, dynamic> json) {
+    if (json.containsKey('answer') && json.containsKey('next_question')) {
+      return true;
+    }
+    return false;
+  }
+
   Future<String> getResponse(String message) async {
     final doc = await rootBundle.loadString('assets/documenten/inwerkmap.txt');
 
@@ -50,6 +57,12 @@ class OpenAIService {
 
         final content = data['choices'][0]['message']['content'];
         final contentMap = jsonDecode(content);
+
+//checkt of de json response van de AI voldoet aan de verwachtingen
+        if (!checkJson(contentMap)) {
+          return jsonEncode({'error': 'Onverwachte respons van de AI'});
+        }
+
         voice = contentMap['answer'] ?? '';
 
         await getSpeech(voice);
