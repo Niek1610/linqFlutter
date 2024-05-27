@@ -25,6 +25,10 @@ class OpenAIService {
   Future<String> getResponse(String message) async {
     final doc = await rootBundle.loadString('assets/documenten/inwerkmap.txt');
 
+    if (messageHistory.isEmpty) {
+      message = 'Hallo, ik ben nieuw hier. Kan je mij helpen met inwerken?';
+    }
+
     messageHistory.add({
       'role': 'user',
       'content':
