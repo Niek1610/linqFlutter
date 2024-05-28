@@ -11,6 +11,54 @@ class AssistantPage extends StatefulWidget {
   _AssistantPageState createState() => _AssistantPageState();
 }
 
+class Typewriter extends StatefulWidget {
+  final String text;
+
+  Typewriter(this.text);
+
+  @override
+  _TypewriterState createState() => _TypewriterState();
+}
+
+class _TypewriterState extends State<Typewriter> with TickerProviderStateMixin {
+  late AnimationController controller;
+  late Animation<int> animation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      duration: const Duration(seconds: 5),
+      vsync: this,
+    );
+
+    animation = StepTween(begin: 0, end: widget.text.length).animate(controller)
+      ..addListener(() {
+        setState(() {});
+      });
+
+    controller.forward();
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      widget.text.substring(0, animation.value),
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 20.0, // Stel de grootte van de tekst in op 20.0
+      ),
+    );
+  }
+}
+
 class _AssistantPageState extends State<AssistantPage>
     with TickerProviderStateMixin {
   final speechToText = SpeechToText();
@@ -21,6 +69,21 @@ class _AssistantPageState extends State<AssistantPage>
   String nextQuestion = '';
   final OpenAIService openAISerice = OpenAIService();
   late AnimationController _controller;
+  Widget dynamicText = Container();
+
+  Widget getDynamicText(dynamic input) {
+    if (input is String) {
+      return Text(
+        input,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 20.0, // Stel de grootte van de tekst in op 20.0
+        ),
+      );
+    } else {
+      return Container();
+    }
+  }
 
   @override
   void initState() {
@@ -30,6 +93,8 @@ class _AssistantPageState extends State<AssistantPage>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..repeat(reverse: true);
+    dynamicText =
+        getDynamicText('Klik op de microfoon om te beginnen met praten.');
   }
 
   Future<void> initSpeechToText() async {
@@ -58,7 +123,7 @@ class _AssistantPageState extends State<AssistantPage>
     speechToText.stop();
     setState(() {
       isThinking = true;
-      dynamicText = "Aan het denken...";
+      dynamicText = getDynamicText('Aan het denken...');
     });
     try {
       final response = await openAISerice.getResponse(lastWords);
@@ -87,7 +152,7 @@ class _AssistantPageState extends State<AssistantPage>
       final res = content['answer'] ?? '';
 
       setState(() {
-        dynamicText = res;
+        dynamicText = Typewriter(res);
         vervolgText = nextQuestion;
         isThinking = false;
       });
@@ -124,24 +189,19 @@ class _AssistantPageState extends State<AssistantPage>
     speechToText.stop();
   }
 
-  String dynamicText = 'Klik op de microfoon om een vraag te stellen!';
-
   void updateText() {
     setState(() {
-      dynamicText = 'Aan het luisteren';
+      dynamicText = getDynamicText("aan het luisteren...");
     });
   }
 
-  void vervolgVraag() async {
+  void createNextQuestion() async {
     setState(() {
       isThinking = true;
-      dynamicText = "Aan het denken...";
+      dynamicText = getDynamicText('Aan het denken...');
     });
-
     final response = await openAISerice.getResponse(vervolgText);
-
     final content = jsonDecode(response);
-
     if (content['error'] != null) {
       showDialog(
         context: context,
@@ -167,7 +227,7 @@ class _AssistantPageState extends State<AssistantPage>
     final res = content['answer'] ?? '';
 
     setState(() {
-      dynamicText = res;
+      dynamicText = Typewriter(res);
       vervolgText = nextQuestion;
       isThinking = false;
     });
@@ -204,15 +264,15 @@ class _AssistantPageState extends State<AssistantPage>
                 padding: EdgeInsets.only(top: 125.0),
                 child: GestureDetector(
                   onTap: isThinking
-                      ? null
+                      ? null // Als de AI aan het denken is, gebeurt er niks on tap
                       : () async {
                           if (aisListening == true) {
-                            stopListening();
+                            stopListening(); // Als de AI al luistert, stop dan met luisteren
                           } else if (await speechToText.hasPermission) {
-                            updateText();
-                            startListening();
+                            updateText(); // Als de AI toestemming heeft om te luisteren, voer de functie uit
+                            startListening(); // en start met luisteren
                           } else {
-                            initSpeechToText();
+                            initSpeechToText(); // Als de assistent geen toestemming heeft, initialiseer dan de spraak-naar-tekst functionaliteit
                           }
                         },
                   child: AnimatedBuilder(
@@ -233,10 +293,7 @@ class _AssistantPageState extends State<AssistantPage>
                 child: Container(
                   height: 150.0,
                   child: SingleChildScrollView(
-                    child: Text(
-                      dynamicText,
-                      style: TextStyle(color: Colors.white),
-                    ),
+                    child: dynamicText,
                   ),
                 ),
               ),
@@ -244,19 +301,19 @@ class _AssistantPageState extends State<AssistantPage>
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 50.0),
                 child: vervolgText.isEmpty || isThinking
-                    ? Container()
+                    ? Container() // Als er geen vervolgtekst is of als de assistent aan het denken is, toon dan een lege container
                     : ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           minimumSize: Size(double.infinity, 50),
                           backgroundColor: Color.fromARGB(50, 0, 0, 0),
                         ),
                         onPressed: () {
-                          vervolgVraag();
+                          createNextQuestion(); // Wanneer de knop wordt ingedrukt, maak de vervolg vraag
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            vervolgText,
+                            vervolgText, // De tekst van de knop is de vervolgtekst
                             style: TextStyle(color: Colors.white),
                             textAlign: TextAlign.center,
                           ),
