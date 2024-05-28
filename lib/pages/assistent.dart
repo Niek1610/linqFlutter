@@ -53,7 +53,7 @@ class _TypewriterState extends State<Typewriter> with TickerProviderStateMixin {
       widget.text.substring(0, animation.value),
       style: TextStyle(
         color: Colors.white,
-        fontSize: 20.0, // Stel de grootte van de tekst in op 20.0
+        fontSize: 20.0,
       ),
     );
   }
@@ -77,7 +77,7 @@ class _AssistantPageState extends State<AssistantPage>
         input,
         style: TextStyle(
           color: Colors.white,
-          fontSize: 20.0, // Stel de grootte van de tekst in op 20.0
+          fontSize: 20.0,
         ),
       );
     } else {
@@ -319,7 +319,7 @@ class _AssistantPageState extends State<AssistantPage>
                           ),
                         ),
                       ),
-              ),
+              )
             ],
           ),
         ],
