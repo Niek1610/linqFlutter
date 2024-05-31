@@ -26,19 +26,19 @@ class OpenAIService {
   Future<String> getResponse(String message) async {
     final doc = await rootBundle.loadString('assets/documenten/inwerkmap.txt');
 
-    if (messageHistory.isEmpty) {
+    if (message.isEmpty) {
       message = 'Hallo, ik ben nieuw hier. Kan je mij helpen met inwerken?';
     }
 
     messageHistory.add({
       'role': 'user',
       'content':
-          'Je krijgt ook een document te zien waar je informatie uit kan halen $doc. Je bent een inwerkhulp voor een zorg instelling, Je helpt met het inwerken van het persoon, dit doe je in stappen. Ik ga je zometeen vragen stellen. Ik verwacht een antwoord en vervolg vraag. Dit moet in het volgende format geschreven worden. {"answer": "<antwoord van de vraag hier>","next_question": "<Vervolg vraag hier>"} het is van belang dat je een JSON format aanhoud en dat je "answer" en "next_question" niet veranderd. De vraag is: $message.',
+          'Je krijgt ook een document te zien waar je informatie uit kan halen $doc. Je bent een inwerkhulp voor een zorg instelling, Je helpt met het inwerken van het persoon, dit doe je in stappen. Ik ga je zometeen vragen stellen. Ik verwacht een antwoord en vervolg vraag, BELANGRIJK: DE VERVOLGVRAAG MOET ZO OPGESTELD WORDEN DAT DE AI ASSISTENT DIE VRAAG KAN BEANTWOORDEN!. Dit moet in het volgende format geschreven worden. {"answer": "<antwoord van de vraag hier>","next_question": "<Vervolg vraag voor de AI hier>"} het is van belang dat je een JSON format aanhoud en dat je "answer" en "next_question" niet veranderd. De vraag is: $message.',
     });
 
-    // hou de messageHistory array op maximaal 5 items, zodat de AI niet te veel informatie krijgt
-    if (messageHistory.length > 5) {
-      messageHistory = messageHistory.sublist(messageHistory.length - 5);
+    // Houd de messageHistory array op maximaal 6 items, verwijder de eerste 3 items als de lengte groter is dan 6, om te voorkomen dat de AI te veel informatie krijgt
+    if (messageHistory.length > 6) {
+      messageHistory = messageHistory.sublist(3);
     }
 
     try {
@@ -50,7 +50,7 @@ class OpenAIService {
           'Authorization': 'Bearer $apiKey',
         },
         body: jsonEncode({
-          "model": "gpt-3.5-turbo-0125",
+          "model": "gpt-4o-2024-05-13",
           "messages": messageHistory,
         }),
       );
@@ -93,7 +93,7 @@ class OpenAIService {
       }
     } catch (e) {
       print(e);
-      return jsonEncode({'error': 'Er is iets fout gegaan'});
+      return jsonEncode({'error': e.toString()});
     }
   }
 
