@@ -1,12 +1,44 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:linqapp/pages/assistent.dart';
 import 'package:linqapp/pages/todo.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   final String uid;
 
   HomePage({required this.uid});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String naam = '';
+
+  @override
+  void initState() {
+    super.initState();
+    getUserName();
+  }
+
+  Future<void> getUserName() async {
+    try {
+      final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .get();
+      if (userDoc.exists) {
+        setState(() {
+          naam = userDoc['naam'];
+        });
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      print(e);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +62,7 @@ class HomePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: Text(
-                'Klik op de rechterknop om een vraag te stellen!',
+                'Welkom, $naam! Hoe kan ik je helpen?',
                 style: TextStyle(
                   color: Color.fromARGB(255, 255, 255, 255),
                   fontSize: 18,
@@ -60,7 +92,7 @@ class HomePage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TodoPage(uid: uid),
+                            builder: (context) => TodoPage(uid: widget.uid),
                           ),
                         ); // replace 'your-uid' with the actual uid // replace TodoPage() with your Todo page widget
                       },
@@ -87,31 +119,12 @@ class HomePage extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              width: 100.0,
-                              height: 100.0,
                               decoration: BoxDecoration(
-                                color: Color.fromRGBO(32, 87, 117, 0.5),
+                                color: Color.fromRGBO(32, 87, 117, 0),
                                 borderRadius: BorderRadius.circular(5.0),
                               ),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'AI',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize:
-                                            18), // Verhoog de font grootte hier
-                                  ),
-                                  Text(
-                                    'Assistent',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize:
-                                            18), // Verhoog de font grootte hier
-                                  ),
-                                ],
-                              ),
+                              child:
+                                  SvgPicture.asset('assets/images/AI_hulp.svg'),
                             ),
                           ),
                         ],
